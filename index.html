@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Band Advisory Request - Mrs. Collins</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .form-container {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            width: 100%;
+            font-weight: 600;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #c3e6cb;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #f5c6cb;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .info-section {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .info-section h2 {
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
+        .info-section ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .info-section li {
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .info-section li:before {
+            content: '♪';
+            position: absolute;
+            left: 0;
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .form-container {
+                padding: 25px;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Mrs. Collins' Band Advisory</h1>
+            <p>Request to join our musical community</p>
+        </div>
+
+        <div class="info-section">
+            <h2>About Band Advisory</h2>
+            <p>Band Advisory is a special program where students can get extra support with their musical development, practice techniques, and band-related academics. Mrs. Collins works closely with advisory students to help them reach their full potential.</p>
+            <br>
+            <h3>What you can expect:</h3>
+            <ul>
+                <li>One-on-one practice sessions</li>
+                <li>Music theory tutoring</li>
+                <li>Performance preparation</li>
+                <li>Study hall for band-related coursework</li>
+                <li>Peer mentoring opportunities</li>
+            </ul>
+        </div>
+
+        <div class="form-container">
+            <div id="successMessage" class="success-message">
+                Thank you for your request! Mrs. Collins will review your application and get back to you soon.
+            </div>
+            
+            <div id="errorMessage" class="error-message">
+                Please fill out all required fields before submitting.
+            </div>
+
+            <form id="advisoryForm">
+                <div class="form-group">
+                    <label for="studentName">Full Name *</label>
+                    <input type="text" id="studentName" name="studentName" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="grade">Grade Level *</label>
+                    <select id="grade" name="grade" required>
+                        <option value="">Select your grade</option>
+                        <option value="9th Grade">9th Grade</option>
+                        <option value="10th Grade">10th Grade</option>
+                        <option value="11th Grade">11th Grade</option>
+                        <option value="12th Grade">12th Grade</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="instrument">Primary Instrument *</label>
+                    <input type="text" id="instrument" name="instrument" placeholder="e.g., Trumpet, Clarinet, Drums" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address *</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" placeholder="(123) 456-7890">
+                </div>
+
+                <div class="form-group">
+                    <label for="experience">Years of Musical Experience *</label>
+                    <select id="experience" name="experience" required>
+                        <option value="">Select experience level</option>
+                        <option value="Less than 1 year">Less than 1 year</option>
+                        <option value="1-2 years">1-2 years</option>
+                        <option value="3-4 years">3-4 years</option>
+                        <option value="5+ years">5+ years</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="currentBand">Are you currently in band? *</label>
+                    <select id="currentBand" name="currentBand" required>
+                        <option value="">Please select</option>
+                        <option value="Yes - Concert Band">Yes - Concert Band</option>
+                        <option value="Yes - Jazz Band">Yes - Jazz Band</option>
+                        <option value="Yes - Marching Band">Yes - Marching Band</option>
+                        <option value="Yes - Multiple Bands">Yes - Multiple Bands</option>
+                        <option value="No">No, but interested in joining</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="goals">What are your musical goals? *</label>
+                    <textarea id="goals" name="goals" placeholder="Tell us what you hope to achieve through band advisory..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="availability">Preferred Advisory Time *</label>
+                    <select id="availability" name="availability" required>
+                        <option value="">Select preferred time</option>
+                        <option value="Before school (7:30-8:00 AM)">Before school (7:30-8:00 AM)</option>
+                        <option value="Lunch period">Lunch period</option>
+                        <option value="After school (3:30-4:30 PM)">After school (3:30-4:30 PM)</option>
+                        <option value="Study hall period">Study hall period</option>
+                        <option value="Flexible">I'm flexible</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="additionalInfo">Additional Information</label>
+                    <textarea id="additionalInfo" name="additionalInfo" placeholder="Is there anything else you'd like Mrs. Collins to know about your musical background or interests?"></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn">Submit Request</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('advisoryForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Basic form validation
+            const requiredFields = this.querySelectorAll('[required]');
+            let allValid = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    allValid = false;
+                }
+            });
+            
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+            
+            if (!allValid) {
+                errorMessage.style.display = 'block';
+                successMessage.style.display = 'none';
+                errorMessage.scrollIntoView({ behavior: 'smooth' });
+                return;
+            }
+            
+            // Hide error message if validation passes
+            errorMessage.style.display = 'none';
+            
+            // Collect form data
+            const formData = new FormData(this);
+            const data = {};
+            for (let [key, value] of formData.entries()) {
+                data[key] = value;
+            }
+            
+            // Add timestamp
+            data.timestamp = new Date().toISOString();
+            data.status = 'new';
+            
+            // Store in localStorage (for GitHub Pages compatibility)
+            let requests = JSON.parse(localStorage.getItem('bandAdvisoryRequests') || '[]');
+            requests.push(data);
+            localStorage.setItem('bandAdvisoryRequests', JSON.stringify(requests));
+            
+            // In a real implementation, you would send this to a server
+            // For now, we'll simulate success and potentially use a webhook
+            
+            // Try to send notification (this would need to be configured with a webhook service)
+            sendNotification(data);
+            
+            // Show success message
+            successMessage.style.display = 'block';
+            successMessage.scrollIntoView({ behavior: 'smooth' });
+            
+            // Reset form
+            this.reset();
+        });
+        
+        function sendNotification(data) {
+            // This is where you would integrate with a notification service
+            // For example, using a webhook to services like:
+            // - Zapier (to send email/SMS)
+            // - IFTTT 
+            // - Direct integration with push notification services
+            
+            // Example webhook call (replace with your actual webhook URL)
+            /*
+            fetch('YOUR_WEBHOOK_URL', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: `New band advisory request from ${data.studentName}`,
+                    data: data
+                })
+            }).catch(err => console.log('Notification failed:', err));
+            */
+            
+            console.log('New request submitted:', data);
+        }
+    </script>
+</body>
+</html>
