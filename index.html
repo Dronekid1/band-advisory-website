@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Band Advisory Request - Mrs. Collins</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#667eea">
     <style>
         * {
             margin: 0;
@@ -101,6 +103,12 @@
 
         .submit-btn:active {
             transform: translateY(0);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .success-message {
@@ -212,14 +220,65 @@
                     <input type="email" id="email" name="email" required>
                 </div>
 
-                <button type="submit" class="submit-btn">Submit Request</button>
+                <div class="form-group">
+                    <label for="preferredDay">Preferred Day to be Pulled *</label>
+                    <select id="preferredDay" name="preferredDay" required>
+                        <option value="">Select your preferred day</option>
+                        <option value="Monday">Monday</option>
+                        <option value="Tuesday">Tuesday</option>
+                        <option value="Wednesday">Wednesday</option>
+                        <option value="Thursday">Thursday</option>
+                        <option value="Friday">Friday</option>
+                        <option value="Any day">Any day is fine</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">Submit Request</button>
             </form>
         </div>
     </div>
 
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js"></script>
+
     <script>
+        // Firebase configuration - REPLACE WITH YOUR CONFIG
+        const firebaseConfig = {
+            // You need to replace this with your actual Firebase config
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        let db, messaging;
+        let firebaseInitialized = false;
+
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            messaging = firebase.messaging();
+            firebaseInitialized = true;
+            console.log('Firebase initialized successfully');
+        } catch (error) {
+            console.log('Firebase not configured, using localStorage fallback');
+        }
+
         document.getElementById('advisoryForm').addEventListener('submit', function(e) {
             e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+            
+            // Disable button during submission
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
             
             // Basic form validation
             const requiredFields = this.querySelectorAll('[required]');
@@ -231,13 +290,12 @@
                 }
             });
             
-            const errorMessage = document.getElementById('errorMessage');
-            const successMessage = document.getElementById('successMessage');
-            
             if (!allValid) {
                 errorMessage.style.display = 'block';
                 successMessage.style.display = 'none';
                 errorMessage.scrollIntoView({ behavior: 'smooth' });
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Request';
                 return;
             }
             
@@ -251,53 +309,81 @@
                 data[key] = value;
             }
             
-            // Add timestamp
+            // Add timestamp and status
             data.timestamp = new Date().toISOString();
             data.status = 'new';
             
-            // Store in localStorage (for GitHub Pages compatibility)
-            let requests = JSON.parse(localStorage.getItem('bandAdvisoryRequests') || '[]');
-            requests.push(data);
-            localStorage.setItem('bandAdvisoryRequests', JSON.stringify(requests));
-            
-            // In a real implementation, you would send this to a server
-            // For now, we'll simulate success and potentially use a webhook
-            
-            // Try to send notification (this would need to be configured with a webhook service)
-            sendNotification(data);
-            
-            // Show success message
-            successMessage.style.display = 'block';
-            successMessage.scrollIntoView({ behavior: 'smooth' });
-            
-            // Reset form
-            this.reset();
+            // Save data and send notification
+            saveRequest(data).then(() => {
+                // Show success message
+                successMessage.style.display = 'block';
+                successMessage.scrollIntoView({ behavior: 'smooth' });
+                
+                // Reset form
+                this.reset();
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Request';
+            }).catch(error => {
+                console.error('Error saving request:', error);
+                errorMessage.textContent = 'There was an error submitting your request. Please try again.';
+                errorMessage.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Request';
+            });
         });
         
-        function sendNotification(data) {
-            // Send to Firebase/Backend API
-            const API_ENDPOINT = 'YOUR_API_ENDPOINT_HERE'; // Replace with your API URL
+        function saveRequest(data) {
+            if (firebaseInitialized) {
+                // Save to Firebase Firestore
+                return db.collection('requests').add(data).then(() => {
+                    console.log('Request saved to Firebase');
+                    // Send push notification to admin
+                    sendPushNotification(data);
+                });
+            } else {
+                // Fallback to localStorage
+                return new Promise((resolve) => {
+                    let requests = JSON.parse(localStorage.getItem('bandAdvisoryRequests') || '[]');
+                    requests.push(data);
+                    localStorage.setItem('bandAdvisoryRequests', JSON.stringify(requests));
+                    console.log('Request saved to localStorage');
+                    resolve();
+                });
+            }
+        }
+
+        function sendPushNotification(data) {
+            if (!firebaseInitialized) return;
+
+            // This would typically be done by a backend service
+            // For now, we'll use Firebase Cloud Functions or a webhook
             
-            fetch(API_ENDPOINT + '/submit-request', {
+            // Example: Send to your backend endpoint that handles push notifications
+            fetch('/api/send-notification', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(data)
-            }).catch(err => console.log('Notification failed:', err));
-            
-            // Also send push notification via service worker if supported
-            if ('serviceWorker' in navigator && 'PushManager' in window) {
-                navigator.serviceWorker.ready.then(registration => {
-                    // This would trigger the push notification
-                    registration.active.postMessage({
-                        type: 'NEW_REQUEST',
-                        data: data
-                    });
+                body: JSON.stringify({
+                    title: 'New Band Advisory Request',
+                    body: `${data.studentName} has requested to join band advisory`,
+                    data: data
+                })
+            }).catch(err => {
+                console.log('Push notification failed:', err);
+                // This is expected to fail without backend setup
+            });
+        }
+
+        // Register service worker for push notifications
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js')
+                .then(registration => {
+                    console.log('Service Worker registered:', registration);
+                })
+                .catch(error => {
+                    console.log('Service Worker registration failed:', error);
                 });
-            }
-            
-            console.log('New request submitted:', data);
         }
     </script>
 </body>
