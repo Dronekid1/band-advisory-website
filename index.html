@@ -275,25 +275,27 @@
         });
         
         function sendNotification(data) {
-            // This is where you would integrate with a notification service
-            // For example, using a webhook to services like:
-            // - Zapier (to send email/SMS)
-            // - IFTTT 
-            // - Direct integration with push notification services
+            // Send to Firebase/Backend API
+            const API_ENDPOINT = 'YOUR_API_ENDPOINT_HERE'; // Replace with your API URL
             
-            // Example webhook call (replace with your actual webhook URL)
-            /*
-            fetch('YOUR_WEBHOOK_URL', {
+            fetch(API_ENDPOINT + '/submit-request', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    message: `New band advisory request from ${data.studentName}`,
-                    data: data
-                })
+                body: JSON.stringify(data)
             }).catch(err => console.log('Notification failed:', err));
-            */
+            
+            // Also send push notification via service worker if supported
+            if ('serviceWorker' in navigator && 'PushManager' in window) {
+                navigator.serviceWorker.ready.then(registration => {
+                    // This would trigger the push notification
+                    registration.active.postMessage({
+                        type: 'NEW_REQUEST',
+                        data: data
+                    });
+                });
+            }
             
             console.log('New request submitted:', data);
         }
